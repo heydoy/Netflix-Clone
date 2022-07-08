@@ -16,6 +16,27 @@ class SignUpViewController: UIViewController {
     var nickname: String = ""
     var location: String = ""
     var referralCode: String = ""
+    var referralInt: Int = 0
+    
+    // for validation
+    var isValidEmail = false {
+        didSet {
+            self.validation()
+        }
+    }
+    
+    var isValidPassword = false {
+        didSet {
+            self.validation()
+        }
+    }
+    
+    var isValidReferral = false {
+        didSet {
+            self.validation()
+        }
+    }
+    
     
     var valueArray: [String] {
         [emailOrPhone, password, nickname,
@@ -28,6 +49,7 @@ class SignUpViewController: UIViewController {
     @IBOutlet weak var nicknameTextField: UITextField!
     @IBOutlet weak var locationTextField: UITextField!
     @IBOutlet weak var referralTextField: UITextField!
+    
     
 //    var arrayTextField: [UITextField] {
 //        [mailTextField, passwordTextField, nicknameTextField,
@@ -44,42 +66,60 @@ class SignUpViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setAttributes(for: [mailTextField, passwordTextField, nicknameTextField,
-            locationTextField,
-            referralTextField])
+        setTextfield(for:
+        [mailTextField,
+         passwordTextField,
+         nicknameTextField,
+         locationTextField,
+         referralTextField])
+        setSwitch(for: moreInfoSwitch)
+        setButton(for: signupButton)
 
     }
     
     // action
     
     @IBAction func tapGestureClicked(_ sender: UITapGestureRecognizer) {
-        // 키보드 내리기
         view.endEditing(true)
     }
     
     @IBAction func didSignupButtonTouched(_ sender: UIButton) {
         view.endEditing(true)
-        
-        if validation() {
-            print("합격")
-        } else {
-            print("다시 입력하세요")
-        }
+        validation()
     }
     
-    
-    // 유효성
-    
-    @IBAction func didReferralTextFieldEditingChanged(_ sender: UITextField) {
+    // 프로퍼티에 저장
+    // @objc 는 왜 안되는지..?
+    @IBAction func textFieldEditingChanged(_ sender: UITextField) {
+        
         let text = sender.text ?? ""
         
-        self.referralCode = text
+        switch sender {
+        case mailTextField :
+            isValidEmail = (text.count >= 3)
+            print(text.count)
+            self.emailOrPhone = text
+        case passwordTextField :
+            isValidPassword = (text.count >= 6)
+            print(text.count)
+            self.password = text
+        case nicknameTextField :
+            self.nickname = text
+        case locationTextField :
+            self.location = text
+        case referralTextField :
+            isValidReferral = Int(text) != nil
+            self.referralCode = text
+            
+        default:
+            print("Missing Textfield")
+        }
         
     }
     
     
     // helpers
-    func setAttributes(for arrayTextField: [UITextField]){
+    func setTextfield(for arrayTextField: [UITextField]){
         arrayTextField.forEach { tf in
             tf.borderStyle = UITextField.BorderStyle.roundedRect
             tf.backgroundColor = UIColor.darkGray
@@ -87,24 +127,32 @@ class SignUpViewController: UIViewController {
             tf.textAlignment = .center
             //tf.attributedPlaceholder = 
         }
-        
-        
         passwordTextField.isSecureTextEntry = true
         referralTextField.keyboardType = .numberPad
-        
     }
     
-    func validation() -> Bool{
-        if self.referralCode != nil {
-            guard let referral = Int(referralCode) else {
-                return false
-            }
+    func setSwitch(for setSwitch: UISwitch) {
+        setSwitch.onTintColor = .orange
+        setSwitch.thumbTintColor = .white
+        setSwitch.setOn(true, animated: true)
+    }
+    
+    func setButton(for btn: UIButton) {
+        btn.setTitle("가입하기", for: .normal)
+        btn.setTitleColor(.black, for: .normal)
+        btn.backgroundColor = .clear
+    }
+    
+    
+    
+    func validation(){
+        if isValidEmail
+        && isValidPassword
+        && isValidReferral {
+            print("통과")
         } else {
-            return false
+            print("잘 입력해주세요 ")
         }
-        return true
     }
-    
-    
 
 }
